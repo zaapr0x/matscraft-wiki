@@ -21,7 +21,7 @@ export default function Home() {
           MatsCraft Wiki
         </Link>
         <Link
-          href="/blog"
+          href="#"
           className={buttonVariants({
             variant: "secondary",
             className: "px-6",
