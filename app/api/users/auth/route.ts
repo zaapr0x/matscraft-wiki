@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import auth from "@/models/auth";
-import { getBalance, updateBalance } from "@/lib/drip";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
