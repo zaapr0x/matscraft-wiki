@@ -2,26 +2,9 @@ import axios from "axios";
 
 const API_BASE_URL = "https://api.drip.re/api/v4";
 
-// Define interfaces for the response data
-interface MemberData {
-  id: string;
-  username: string;
-  tokenBalance: TokenBalance[];
-}
-
-interface TokenBalance {
-  realmPointId: string;
-  tokens: number;
-}
-
-interface UpdateBalanceResponse {
-  success: boolean;
-  tokenBalance: TokenBalance;
-}
-
-const getBalance = async (userId: string): Promise<MemberData> => {
+const getBalance = async (userId: string) => {
   try {
-    const response = await axios.get<MemberData>(
+    const response = await axios.get(
       `${API_BASE_URL}/realms/${process.env.REALM}/members/${userId}`,
       {
         headers: {
@@ -30,19 +13,16 @@ const getBalance = async (userId: string): Promise<MemberData> => {
       }
     );
 
-    return response.data;
+    return response.data.tokens;
   } catch (error) {
     console.error("Failed to fetch balance:", error);
     throw error;
   }
 };
 
-const updateBalance = async (
-  userId: string,
-  amount: number
-): Promise<UpdateBalanceResponse> => {
+const updateBalance = async (userId: string, amount: number) => {
   try {
-    const response = await axios.patch<UpdateBalanceResponse>(
+    const response = await axios.patch(
       `${API_BASE_URL}/realms/${process.env.REALM}/members/${userId}/tokenBalance`,
       {
         realmPointId: process.env.REALM_POINT_ID,

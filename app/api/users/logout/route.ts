@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import db from "@/models/users";
+import logout from "@/models/logout";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  await db.removeUser(body.minecraft_id);
-  return NextResponse.json("ok", { status: 200 });
+  const response = await logout(body.minecraft_id);
+  if (!response) {
+    return NextResponse.json({ message: "Failed Logout" }, { status: 400 });
+  }
+
+  return NextResponse.json(response, { status: 200 });
 }

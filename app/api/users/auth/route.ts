@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import auth from "@/models/auth";
+import { auth } from "@/models/auth";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
 
-  const { status, data, message } = await auth.auth(body);
-  if (status === 200) {
-    return NextResponse.json(data, { status });
-  }
+  const response = await auth(
+    body.token,
+    body.minecraft_username,
+    body.minecraft_id
+  );
+  console.log(response);
 
-  return NextResponse.json({ message }, { status });
+  return NextResponse.json(response, { status: 200 });
 }

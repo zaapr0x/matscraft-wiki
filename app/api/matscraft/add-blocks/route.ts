@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import db from "@/models/matscraft";
+import db from "@/models/addBlocks";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();

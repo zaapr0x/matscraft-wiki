@@ -1,92 +1,116 @@
 import { supabase } from "@/lib/supabaseConfig";
-import userModel from "@/models/users";
 import { getBalance } from "@/lib/drip";
-interface AuthToken {
-  id: number;
-  verification_token: string;
-  discord_id: string;
-  status: "used" | "expired" | "pending";
-  [key: string]: any;
-}
 
-interface AuthData {
-  token: string;
-  username: string;
-  xuid: string;
-}
+const getToken = async (token: string) => {
+  const { data, error } = await supabase
+    .from("auth_tokens")
+    .select("*")
+    .eq("verification_token", token)
+    .maybeSingle();
 
-export default class AuthModel {
-  static async getToken(data: { token: string }): Promise<AuthToken | null> {
-    try {
-      const { data: results, error } = await supabase
-        .from("auth_tokens")
-        .select("*")
-        .eq("verification_token", data.token)
-        .maybeSingle<AuthToken>();
-
-      if (error) throw error;
-      return results;
-    } catch (error: any) {
-      throw error;
-    }
+  if (error) {
+    return {
+      status: 500,
+      message: "Internal server error",
+    };
   }
 
-  static async auth(
-    data: AuthData
-  ): Promise<{ status: number; message?: string; data?: any }> {
-    try {
-      const token = await this.getToken({ token: data.token });
-
-      if (!token) {
-        return { status: 400, message: "Invalid token" };
-      }
-
-      if (token.status === "expired") {
-        return { status: 400, message: "Token already expired" };
-      }
-      if (token.status === "used") {
-        return { status: 400, message: "Token already used" };
-      }
-
-      const { data: updatedToken, error } = await supabase
-        .from("auth_tokens")
-        .update({ status: "used" })
-        .eq("verification_token", token.verification_token)
-        .select()
-        .maybeSingle();
-
-      if (error || !updatedToken) {
-        console.error("Failed to update token status:", error);
-        return { status: 500, message: "Failed to update token status" };
-      }
-
-      const balance = await getBalance(token.discord_id);
-
-      const updateUser = await userModel.updateUser({
-        discord_id: token.discord_id,
-        balance: balance.tokens,
-        minecraft_username: data.username,
-        minecraft_id: data.xuid,
-        is_verified: true,
-        updated_at: new Date().toISOString(),
-      });
-
-      if (!updateUser) {
-        return { status: 500, message: "Failed to update user" };
-      }
-
-      const user = await userModel.getUser(token.discord_id);
-
-      return {
-        status: 200,
-        data: user,
-      };
-    } catch (error: any) {
-      console.error("Auth error:", error);
-      return {
-        status: 500,
-        message: "Internal server error",
-      };
-    }
+  // If Token does not exist: Response With Invalid Token
+  if (!data) {
+    return {
+      status: 404,
+      message: "Invalid Token!",
+    };
   }
-}
+
+  // Filter Expired or Used Tokens
+  if (data.status === "expired" || data.status === "used") {
+    // If Token Expired: Response With Token Expired
+    // If Token Already Used: Response With Token Already Used
+    return data.status == "expired"
+      ? {
+          status: 400,
+          message: "Token Expired!",
+        }
+      : {
+          status: 400,
+          message: "Token Already Used!",
+        };
+  }
+
+  // If Token is Valid
+  return {
+    status: 200,
+    data,
+  };
+};
+
+const updateToken = async (token: string) => {
+  const { data, error } = await supabase
+    .from("auth_tokens")
+    .update({ status: "used" })
+    .eq("verification_token", token)
+    .maybeSingle();
+
+  if (error) {
+    return {
+      status: 500,
+      message: "Internal server error",
+    };
+  }
+
+  return {
+    status: 200,
+    data,
+  };
+};
+
+const auth = async (
+  token: string,
+  minecraft_username: string,
+  minecraft_id: string
+) => {
+  const tokenData = await getToken(token);
+  if (tokenData.status !== 200) {
+    return tokenData;
+  }
+  console.log(tokenData);
+  const updateTokens = await updateToken(token);
+  if (updateTokens.status !== 200) {
+    return updateTokens;
+  }
+  const newBalance = await getBalance(tokenData.data.discord_id);
+
+  const { data, error } = await supabase
+    .from("users")
+    .update({
+      minecraft_id: minecraft_id,
+      minecraft_username: minecraft_username,
+      is_verified: true,
+      updated_at: new Date().toISOString(),
+      balance: newBalance,
+    })
+    .eq("discord_id", tokenData.data.discord_id)
+    .maybeSingle();
+
+  if (error) {
+    return {
+      status: 500,
+      message: "Internal server error",
+    };
+  }
+  const userData = await supabase
+    .from("users")
+    .select("*")
+    .eq("discord_id", tokenData.data.discord_id)
+    .maybeSingle();
+
+  if (userData.error) {
+    return {
+      status: 500,
+      message: "Internal server error",
+    };
+  }
+  return userData.data;
+};
+export { auth };
