@@ -11,7 +11,9 @@ interface User {
 }
 
 export default class Users {
-  static async getBalance(minecraft_id: string): Promise<number> {
+  static async getBalance(
+    minecraft_id: string
+  ): Promise<{ balance: number; error?: any; status?: number }> {
     const { data, error } = await supabase
       .from("users")
       .select("balance")
@@ -19,14 +21,14 @@ export default class Users {
       .maybeSingle<{ balance: number }>();
 
     if (error) throw new Error(error.message);
-    return data?.balance ?? 0;
+    return { status: 200, balance: data?.balance ?? 0 };
   }
 
   static async updateBalance(
     minecraft_id: string,
     amount: number
   ): Promise<any> {
-    const currentBalance = await this.getBalance(minecraft_id);
+    const currentBalance = (await this.getBalance(minecraft_id)).balance;
     let newBalance = currentBalance + amount;
 
     if (newBalance < 0) newBalance = 0;
