@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabaseConfig";
-
+import { getBalance, updateBalance } from "@/lib/drip";
 interface User {
   discord_id: string;
   minecraft_id: string;
@@ -42,6 +42,24 @@ export default class Users {
       return { status: 500, message: error.message };
     }
   }
+  static async syncBalance(
+    minecraft_id: string,
+    discord_id: string,
+    amount: number
+  ): Promise<any> {
+    const currentBalance = await updateBalance(discord_id, amount);
+    let newBalance = await supabase
+      .from("users")
+      .update({ balance: currentBalance.tokens })
+      .eq("discord_id", discord_id)
+      .maybeSingle();
+    if (newBalance.error) throw new Error(newBalance.error.message);
+
+    return { status: 200, balance: currentBalance.tokens };
+  }
+  catch(error: any) {
+    return { status: 500, message: error.message };
+  }
 
   static async getUser(discordId: string): Promise<User | null> {
     try {
@@ -69,6 +87,19 @@ export default class Users {
 
       if (error) throw new Error(error.message);
       return results!;
+    } catch (error: any) {
+      throw error;
+    }
+  }
+  static async removeUser(minecraft_id: string): Promise<void> {
+    try {
+      const status = await supabase
+        .from("users")
+        .delete()
+        .eq("minecraft_id", minecraft_id);
+
+      if (status.error) throw new Error(status.error.message);
+      return;
     } catch (error: any) {
       throw error;
     }
