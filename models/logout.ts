@@ -1,5 +1,4 @@
 import { supabase } from "@/lib/supabaseConfig";
-import { updateBalance } from "@/lib/drip";
 
 export default async (minecraft_id: string) => {
   const { data, error } = await supabase
@@ -13,6 +12,6 @@ export default async (minecraft_id: string) => {
   }
   return {
     status: 200,
-    message: "User logged out successfully",
+    message: "User logged out successfully0",
   };
 };

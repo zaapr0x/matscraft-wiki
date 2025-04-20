@@ -4,7 +4,7 @@ import updateBalance from "@/models/updateBalance";
 export async function PUT(request: NextRequest) {
   const body = await request.json();
   const response = await updateBalance(body.discord_id, body.amount);
-  if (!response) {
+  if (response.status !== 200) {
     return NextResponse.json(
       { message: "Failed Update Balance" },
       { status: 400 }

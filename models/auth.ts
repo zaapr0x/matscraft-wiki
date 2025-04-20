@@ -74,7 +74,7 @@ const auth = async (
   if (tokenData.status !== 200) {
     return tokenData;
   }
-  console.log(tokenData);
+
   const updateTokens = await updateToken(token);
   if (updateTokens.status !== 200) {
     return updateTokens;
@@ -111,6 +111,10 @@ const auth = async (
       message: "Internal server error",
     };
   }
-  return userData.data;
+  return {
+    status: 200,
+    data: userData.data,
+    message: "Account Linked Successfully!",
+  };
 };
 export { auth };
