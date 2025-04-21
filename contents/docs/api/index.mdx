@@ -1,0 +1,44 @@
+---
+title: Matscraft API Documentation
+description: Matscraft API Documentation For Devs
+---
+
+## Auth
+- PATH: `/api/users/auth`
+- METHOD: `POST`
+- BODY:`JSON`
+  - `minecraft_id`
+  - `minecraft_username`
+  - `token`
+
+### Response
+```json
+{
+    "id": "f751142f-8f13-46a6-8d4f-39800ba7b154",
+    "discord_id": "1190194345295482952",
+    "discord_username": "zaapr0x",
+    "minecraft_username": "Steve123",
+    "minecraft_id": "123456789",
+    "is_verified": true,
+    "created_at": "2025-04-20T17:11:11.339+00:00",
+    "updated_at": "2025-04-21T13:12:06.839+00:00",
+    "balance": 4226
+}
+```
+
+## Update Balance
+- PATH: `/api/users/update-balance`
+- METHOD: `PUT`
+- BODY:`JSON`
+- `discord_id`
+- `amount`
+- HEADERS: `matscraft-secret`
+
+### Response
+```json
+
+{
+    "balance": "999"
+}
+
+```
