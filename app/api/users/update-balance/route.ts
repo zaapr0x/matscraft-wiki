@@ -4,7 +4,7 @@ import { decodeSecret } from "@/lib/decodeSecret.js";
 
 export async function PUT(request: NextRequest) {
   const body = await request.json();
-  const headers = request.headers; // <- tidak perlu `await`
+  const headers = request.headers;
 
   try {
     const encryptedSecret = headers.get("matscraft-secret");
@@ -14,7 +14,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const secret = decodeSecret(encryptedSecret);
-
+    console.log("DECODED_SECRET:"+secret)
     if (typeof secret !== "object" || !secret.expires) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }

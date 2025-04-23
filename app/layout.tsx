@@ -21,14 +21,14 @@ const monoFont = Space_Mono({
 
 export const metadata: Metadata = {
   title: "Matscraft",
-  description: "A P2E Minecraft Server by MallardLabs",
+  description: "A P2E Minecraft Server by Mallard Labs",
   icons: {
     icon: "/favicon.png", // Gambar Favicon
     shortcut: "/favicon.png", // Shortcut icon
   },
   openGraph: {
     title: "Matscraft",
-    description: "A P2E Minecraft Server by MallardLabs",
+    description: "A P2E Minecraft Server by Mallard Labs",
     url: "https://mallardlabs.xyz",
     siteName: "Matscraft",
     images: [
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Matscraft",
-    description: "A P2E Minecraft Server by MallardLabs",
+    description: "A P2E Minecraft Server by Mallard Labs",
     images: ["/opengraph-image.png"],
   },
 };
